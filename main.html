@@ -21,7 +21,7 @@
         <option value="Other">Other</option>
       </select><br><br>
       <label for="expenseName">Expense Description:</label>
-      <input type="text" id="expenseName" required><br>
+      <input type="text" id="expenseDesc" required><br>
       
       <button type="submit">Add Expense</button>
     </form>
@@ -29,11 +29,9 @@
 
       <ul id="items" class="list-group">
         <li class="list-group-item"></li>  
-      </ul>
-    <div id="expenseList"></div>
-    
+      </ul>    
   </div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.0/axios.min.js"></script>
   <script src="index.js"></script>
 </body>
 </html>

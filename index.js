@@ -3,7 +3,7 @@ const myForm = document.querySelector('#expenseForm');
 const expenseAmount = document.querySelector('#expenseAmount');
 
 const expenseCategory = document.querySelector('#expenseCategory');
-const expenseName = document.querySelector('#expenseName');
+const expenseDesc = document.querySelector('#expenseDesc');
 const itemList = document.getElementById('items');
 
 
@@ -12,33 +12,39 @@ itemList.addEventListener('click', removeItem);
   
 function onSubmit(e){
     e.preventDefault();
-    
-    let myObj={
-        expenseAmount:expenseAmount.value,
-        expenseCategory:expenseCategory.value,
-        expenseName:expenseName.value
+    const amount=expenseAmount.value;
+    const category=expenseCategory.value;
+    const description=expenseDesc.value;
+    var myObj={
+        amount,category,description
     };
-    myObj=JSON.stringify(myObj);
-    e.preventDefault(); 
-    localStorage.setItem(expenseName.value,myObj);
-  
+    axios.post('http://localhost:5000/add-expense',myObj)
+      .then(res=> {
+        showOnscreen(res.data.newData)
+      })
+      .catch(e=> console.log(e))
+  }
+  function showOnscreen(data)
+  {
     // Create new li element
     var li = document.createElement('li');
     // Add class
     li.className = 'items';
     // Add text node with input value
-    li.appendChild(document.createTextNode(expenseAmount.value));
+    li.appendChild(document.createTextNode(data.category));
     li.appendChild(document.createTextNode("-"));
-    li.appendChild(document.createTextNode(expenseCategory.value));
+    li.appendChild(document.createTextNode(data.description));
     li.appendChild(document.createTextNode("-"));
-    li.appendChild(document.createTextNode(expenseName.value));
+    li.appendChild(document.createTextNode(data.amount));
     li.appendChild(document.createTextNode(" "));
     // Create del button element
     var deleteBtn = document.createElement('button');
     var editBtn= document.createElement('button');
     // Add classes to del button
     deleteBtn.className = 'btn-sm float-right delete';
-    editBtn.className="btn-sm float-right edit"
+    deleteBtn.id=data.id;
+    editBtn.className="btn-sm float-right edit";
+    editBtn.id=data.id;
     // Append text node
     deleteBtn.appendChild(document.createTextNode('delete'));
     editBtn.appendChild(document.createTextNode('edit'));  
@@ -48,21 +54,37 @@ function onSubmit(e){
     li.appendChild(editBtn);
     // Append li to list
     itemList.appendChild(li);
-  }  
+  }
   
   function removeItem(e){
     if(e.target.classList.contains('delete')){
       var li = e.target.parentElement;
-      console.log(li);
-      localStorage.removeItem(li.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nodeValue);
-      itemList.removeChild(li); 
+      axios.post('http://localhost:5000/delete',{id:e.target.id})
+      .then(res=> {
+        console.log(res);
+      })
+      .catch(e=> console.log(e))
+      itemList.removeChild(li);
     }
     if(e.target.classList.contains('edit')){
       var li = e.target.parentElement;
-      expenseCategory.value=li.firstChild.nextSibling.nextSibling.nodeValue;
-      expenseAmount.value=li.firstChild.nodeValue;
-      expenseName.value=li.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nodeValue;
-      localStorage.removeItem(li.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nodeValue);
+      expenseDesc.value=li.firstChild.nextSibling.nextSibling.nodeValue;
+      expenseCategory.value=li.firstChild.nodeValue;
+      expenseAmount.value=li.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nodeValue;
+      axios.post('http://localhost:5000/delete',{id:e.target.id})
+      .then(res=> {
+        console.log(res);
+      })
+      .catch(e=> console.log(e))
       itemList.removeChild(li);
   }
 }
+window.addEventListener('DOMContentLoaded',()=>{
+  axios.get('http://localhost:5000/add-expense')
+    .then( res=> {
+      console.log(res.data.user);
+      for(var i=0; i<res.data.user.length; i++) { 
+        showOnscreen(res.data.user[i]);
+    }})
+
+})
